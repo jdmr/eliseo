@@ -46,9 +46,6 @@ class BootStrap {
                 , escuela: escuela
             )
             admin.save(flush:true)
-            log.debug("Admin: $admin")
-            log.debug("Rol:   $rolAdmin")
-            //general.UsuarioRol.create(admin, rolAdmin, true)
             general.UsuarioRol.create(admin, rolAdmin, true)
         }
 

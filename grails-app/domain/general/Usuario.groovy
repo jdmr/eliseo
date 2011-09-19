@@ -6,10 +6,10 @@ class Usuario implements Serializable {
 
 	String username
 	String password
-	boolean enabled
-	boolean accountExpired
-	boolean accountLocked
-	boolean passwordExpired
+	boolean enabled = true
+	boolean accountExpired = false
+	boolean accountLocked = false
+	boolean passwordExpired = false
     String nombre
     String apellido
     String telefono
@@ -17,6 +17,9 @@ class Usuario implements Serializable {
     String pais
     Date dateCreated
     Date lastUpdated
+    Escuela escuela
+
+    static belongsTo = [Escuela]
 
 	static constraints = {
 		username blank: false, unique: true

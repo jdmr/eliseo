@@ -1,6 +1,8 @@
 // locations to search for config files that get merged into the main config
 // config files can either be Java properties files or ConfigSlurper scripts
 
+grails.config.locations = [ "file:${userHome}/.grails/${appName}-config.groovy" ]
+
 // grails.config.locations = [ "classpath:${appName}-config.properties",
 //                             "classpath:${appName}-config.groovy",
 //                             "file:${userHome}/.grails/${appName}-config.properties",
@@ -60,6 +62,7 @@ grails.exceptionresolver.params.exclude = ['password']
 environments {
     development {
         grails.logging.jul.usebridge = true
+        grails.gsp.enable.reload = true
     }
     production {
         grails.logging.jul.usebridge = false
@@ -75,6 +78,9 @@ log4j = {
     //appenders {
     //    console name:'stdout', layout:pattern(conversionPattern: '%c{2} %m%n')
     //}
+    appenders {
+        console name:'stdout', layout:pattern(conversionPattern: '%d [SILOE] %5p [%c{2}] | %m%n')
+    }
 
     error  'org.codehaus.groovy.grails.web.servlet',  //  controllers
            'org.codehaus.groovy.grails.web.pages', //  GSP
@@ -97,9 +103,34 @@ log4j = {
     off    'grails.app.services.org.grails.plugin.resource',
            'grails.app.taglib.org.grails.plugin.resource',
            'grails.app.resourceMappers.org.grails.plugin.resource'
+
+    debug  'grails.app','org.hibernate.sql'
+
+    //trace  'org.hibernate.type'
+
+    off    'grails.app.services.org.grails.plugin.resource',
+           'grails.app.taglib.org.grails.plugin.resource',
+           'grails.app.resourceMappers.org.grails.plugin.resource'
+    
+}
+
+grails.gorm.failOnError = true
+grails.gorm.default.mapping = {
+   id generator:'identity'
 }
 
 // Added by the Spring Security Core plugin:
 grails.plugins.springsecurity.userLookup.userDomainClassName = 'general.Usuario'
 grails.plugins.springsecurity.userLookup.authorityJoinClassName = 'general.UsuarioRol'
 grails.plugins.springsecurity.authority.className = 'general.Rol'
+
+// Se cargan los datos del usuario a sesion
+// cuando estos se firman al sistema
+grails.plugins.springsecurity.useSecurityEventListener = true
+grails.plugins.springsecurity.onInteractiveAuthenticationSuccessEvent = { e, appCtx ->
+    def domain = general.Usuario.executeQuery("select new map(usuario.escuela.nombre as escuela, usuario.nombre as nombre, usuario.apellido as apellido) from Usuario usuario where usuario.username = ?", [e.source.principal.username])
+    def request = org.codehaus.groovy.grails.plugins.springsecurity.SecurityRequestHolder.getRequest()
+    def session = request.getSession(false)
+    session.escuela = domain[0].escuela
+    session.nombreUsuario = "${domain[0].nombre} ${domain[0].apellido}"
+}
